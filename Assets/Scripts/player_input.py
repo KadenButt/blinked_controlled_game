@@ -2,8 +2,10 @@ import socket
 import time
 import numpy as np
 import cv2
+from threading import Thread
 
 connected_to_unity = False
+blink_detection_result = None 
 
 class Unity:
 
@@ -37,8 +39,6 @@ class Unity:
 
 def blink_detection():
         
-        eye_open = ""   
-        blink = False
 
         
         #Initializing the face and eye cascade classifiers from xml files
@@ -52,8 +52,7 @@ def blink_detection():
         cap = cv2.VideoCapture(0)
         ret,img = cap.read()
         
-        print(eye_open)
-        print(blink)
+
 
         while(ret):
             ret,img = cap.read()
@@ -61,6 +60,8 @@ def blink_detection():
             gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
             #Applying filter to remove impurities
             gray = cv2.bilateralFilter(gray,5,1,1)
+
+            global blink_detection_result
         
             #Detecting the face for region of image to be fed to eye classifier
             faces = face_cascade.detectMultiScale(gray, 1.3, 5,minSize=(200,200))
@@ -82,12 +83,14 @@ def blink_detection():
                             (70,70), 
                             cv2.FONT_HERSHEY_PLAIN, 3,
                             (0,255,0),2)
+
                         else:
                             eye_open = True
                             cv2.putText(img,
                             "Eyes open!", (70,70),
                             cv2.FONT_HERSHEY_PLAIN, 2,
                             (255,255,255),2)
+                            blink_detection_result = "Eyes Open!"
                     else:
                         if(first_read):
                             eye_open = False
@@ -96,12 +99,13 @@ def blink_detection():
                             "No eyes detected", (70,70),
                             cv2.FONT_HERSHEY_PLAIN, 3,
                             (0,0,255),2)
+                            blink_detection_result = "No eyes detected"
                         else:
                             #This will print on console and restart the algorithm
                             print("Blink detected--------------")
-                            cv2.waitKey(3000)
+                            blink_detection_result = "Blink"
+                            ##cv2.waitKey(3000)
                             first_read=True
-                            blink = True
                     
             else:
                 cv2.putText(img,
@@ -114,9 +118,11 @@ def blink_detection():
             a = cv2.waitKey(1)
             if(a==ord('q')):
                 break
-            elif(a==ord('s') and first_read):
-                #This will start the detection
-                first_read = False
+
+            first_read = False
+            # elif(a==ord('s') and first_read):
+            #     #This will start the detection
+            #     first_read = False
         
         cap.release()
         cv2.destroyAllWindows()
@@ -124,4 +130,11 @@ def blink_detection():
 
 
 if __name__ == "__main__":
-    blink_detection()
+    thread = Thread(target=blink_detection)
+    thread.start()
+
+    while True:
+        print(blink_detection_result)
+    #blink_detection()
+
+
