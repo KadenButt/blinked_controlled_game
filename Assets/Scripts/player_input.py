@@ -3,6 +3,7 @@ import time
 import numpy as np
 import cv2
 from threading import Thread
+import statistics
 
 connected_to_unity = False
 blink_detection_result = None 
@@ -37,7 +38,9 @@ class Unity:
         else:
             print("[UNITY] error-client isnt connected to server")
 
-def blink_detection():
+
+
+def Blink_Detection():
         
 
         
@@ -52,7 +55,15 @@ def blink_detection():
         cap = cv2.VideoCapture(0)
         ret,img = cap.read()
         
+        global result
 
+        previous_result_mode = None
+        result_mode = None
+        result_list = []
+        result =  None
+        blink_num = 0
+        counter = 0
+        
 
         while(ret):
             ret,img = cap.read()
@@ -61,7 +72,7 @@ def blink_detection():
             #Applying filter to remove impurities
             gray = cv2.bilateralFilter(gray,5,1,1)
 
-            global blink_detection_result
+            
         
             #Detecting the face for region of image to be fed to eye classifier
             faces = face_cascade.detectMultiScale(gray, 1.3, 5,minSize=(200,200))
@@ -90,7 +101,7 @@ def blink_detection():
                             "Eyes open!", (70,70),
                             cv2.FONT_HERSHEY_PLAIN, 2,
                             (255,255,255),2)
-                            blink_detection_result = "Eyes Open!"
+                            result = "Eyes Open!"
                     else:
                         if(first_read):
                             eye_open = False
@@ -99,14 +110,16 @@ def blink_detection():
                             "No eyes detected", (70,70),
                             cv2.FONT_HERSHEY_PLAIN, 3,
                             (0,0,255),2)
-                            blink_detection_result = "No eyes detected"
+                            result = "No eyes detected"
                         else:
                             #This will print on console and restart the algorithm
-                            print("Blink detected--------------")
-                            blink_detection_result = "Blink"
+                            result = "Blink"
                             ##cv2.waitKey(3000)
                             first_read=True
-                    
+
+
+
+
             else:
                 cv2.putText(img,
                 "No face detected",(100,100),
@@ -119,7 +132,35 @@ def blink_detection():
             if(a==ord('q')):
                 break
 
+            
+
+            # if blink_detection_result != blink_detection_previous_result:
+            #     blink_num += 1
+            #     print("Blinked " + str(blink_num))
+
+            # blink_detection_previous_result = blink_detection_result
+
+            if counter <= 4:
+                result_list.append(result)
+                #print(result_list)
+                
+            else:
+                result_mode = statistics.mode(result_list)
+                counter = 0
+                result_list = []
+                #print(result_mode)
+                #print(previous_result_mode)
+
+                if result_mode != previous_result_mode:
+                    blink_num += 1
+                    print("Blinked " + str(blink_num))
+
+                previous_result_mode = result_mode
+   
+
+
             first_read = False
+            counter += 1
             # elif(a==ord('s') and first_read):
             #     #This will start the detection
             #     first_read = False
@@ -130,11 +171,13 @@ def blink_detection():
 
 
 if __name__ == "__main__":
-    thread = Thread(target=blink_detection)
+    thread = Thread(target=Blink_Detection)
     thread.start()
+    x = None
 
-    while True:
-        print(blink_detection_result)
+    
+    
+
     #blink_detection()
 
 

@@ -9,7 +9,7 @@ public class player : MonoBehaviour
 {
     Thread mThread;
     public string connectionIP = "127.0.0.1";
-    public int connectionPort = 25001;
+    public int connectionPort = 25000;
     IPAddress localAdd;
     TcpListener listener;
     TcpClient client;
@@ -18,6 +18,7 @@ public class player : MonoBehaviour
 
     private void Update()
     {
+        
     }
 
     private void Start()
@@ -31,7 +32,6 @@ public class player : MonoBehaviour
     void GetInfo()
     {
         localAdd = IPAddress.Parse(connectionIP);
-        Debug.Log(connectionIP);
         listener = new TcpListener(IPAddress.Any, connectionPort);
         listener.Start();
 
