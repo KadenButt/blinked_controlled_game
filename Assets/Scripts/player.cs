@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Net;
@@ -60,7 +61,8 @@ public class player : MonoBehaviour
        
         string dataReceived = Encoding.UTF8.GetString(buffer, 0, bytesRead); //Converting byte data to string
         
-        if(dataReceived != null){Debug.Log(dataReceived);}
+        
+        if(!string.IsNullOrEmpty(dataReceived)){Debug.Log(dataReceived);}
 
         if(dataReceived == disconnectMessage){Debug.Log("[SERVER] closed"); running=false;}
         

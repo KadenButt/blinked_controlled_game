@@ -7,28 +7,30 @@ import statistics
 
 connected_to_unity = False
 blink_detection_result = None 
+face_detected = False
+
 
 class Unity:
 
     def __init__(self):
-
         try:
-            host, port = "127.0.0.1", 25001
+            host, port = "127.0.0.1", 25000
             self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             self.sock.connect((host, port))
+            global connected_to_unity
             connected_to_unity = True 
             print("[UNITY] connected")
         except:
             print("[UNITY] error-unable to connect to server")
 
     def Send_To_C(self,  msg):
-        if connected_to_unity:
+        if(connected_to_unity):
             self.sock.sendall(msg.encode("UTF-8"))
         else:
-            print("[UNITY] error-client isnt connected to server")
+            print("[UNITY] error-client isnt connected to server, unable to send msg")
 
     def Disconnect(self):
-        if connected_to_unity:
+        if(connected_to_unity):
             disconnect_message = "!DISCONNECT!"
             self.Send_To_C(disconnect_message)
             time.sleep(1)
@@ -40,8 +42,10 @@ class Unity:
 
 
 
-def Blink_Detection():
         
+if __name__ == "__main__":
+        # set up connection to unity
+        unity = Unity()
 
         
         #Initializing the face and eye cascade classifiers from xml files
@@ -56,17 +60,7 @@ def Blink_Detection():
         
         #Starting the video capture
         cap = cv2.VideoCapture(0)
-        ret,img = cap.read()
-        
-        
-
-
-        # global result 
-        # global previous_result_mode
-        # global face_detected
-
-    
-        
+        ret,img = cap.read()        
 
         while(ret):
             ret,img = cap.read()
@@ -91,21 +85,13 @@ def Blink_Detection():
         
                     #Examining the length of eyes object for eyes
                     if(len(eyes)>=2): 
-                        #Check if program is running for detection
-                        if(first_read):
-                            cv2.putText(img,
-                            "Eye detected press s to begin",
-                            (70,70), 
-                            cv2.FONT_HERSHEY_PLAIN, 3,
-                            (0,255,0),2)
 
-                        else:
+                        if(not first_read):
                             eye_open = True
                             cv2.putText(img,
                             "Eyes open!", (70,70),
                             cv2.FONT_HERSHEY_PLAIN, 2,
                             (255,255,255),2)
-                            
                             result = "Eyes Open!"
                             
 
@@ -121,7 +107,6 @@ def Blink_Detection():
                         else:
                             #This will print on console and restart the algorithm
                             result = "Blink"
-                            ##cv2.waitKey(3000)
                             first_read=True
 
 
@@ -140,35 +125,19 @@ def Blink_Detection():
             if(a==ord('q')):
                 break
 
-            
-
-            # if blink_detection_result != blink_detection_previous_result:
-            #     blink_num += 1
-            #     print("Blinked " + str(blink_num))
-
-            # blink_detection_previous_result = blink_detection_result
-            
-            if result == "Eyes Open!" and previous_result == "Blink":
+            ##checks for a blink
+            if(result == "Eyes Open!" and previous_result == "Blink"):
                 blink_num += 1
-                print("Blinked " + str(blink_num))
+                unity.Send_To_C(str(blink_num))
 
             first_read = False
             previous_result = result
-
-            # elif(a==ord('s') and first_read):
-            #     #This will start the detection
-            #     first_read = False
-           
         
         cap.release()
         cv2.destroyAllWindows()
         
 
 
-if __name__ == "__main__":
-    thread = Thread(target=Blink_Detection)
-    thread.start()
-    x = None
 
     
     
