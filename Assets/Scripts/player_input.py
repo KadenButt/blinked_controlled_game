@@ -50,19 +50,22 @@ def Blink_Detection():
         
         #Variable store execution state
         first_read = True
+        result =  None
+        previous_result = None 
+        blink_num = 0
         
         #Starting the video capture
         cap = cv2.VideoCapture(0)
         ret,img = cap.read()
         
-        global result
+        
 
-        previous_result_mode = None
-        result_mode = None
-        result_list = []
-        result =  None
-        blink_num = 0
-        counter = 0
+
+        # global result 
+        # global previous_result_mode
+        # global face_detected
+
+    
         
 
         while(ret):
@@ -78,6 +81,7 @@ def Blink_Detection():
             faces = face_cascade.detectMultiScale(gray, 1.3, 5,minSize=(200,200))
             if(len(faces)>0):
                 for (x,y,w,h) in faces:
+                    face_detected = True
                     img = cv2.rectangle(img,(x,y),(x+w,y+h),(0,255,0),2)
         
                     #roi_face is face which is input to eye classifier
@@ -86,7 +90,7 @@ def Blink_Detection():
                     eyes = eye_cascade.detectMultiScale(roi_face,1.3,5,minSize=(50,50))
         
                     #Examining the length of eyes object for eyes
-                    if(len(eyes)>=2):
+                    if(len(eyes)>=2): 
                         #Check if program is running for detection
                         if(first_read):
                             cv2.putText(img,
@@ -101,7 +105,10 @@ def Blink_Detection():
                             "Eyes open!", (70,70),
                             cv2.FONT_HERSHEY_PLAIN, 2,
                             (255,255,255),2)
+                            
                             result = "Eyes Open!"
+                            
+
                     else:
                         if(first_read):
                             eye_open = False
@@ -125,6 +132,7 @@ def Blink_Detection():
                 "No face detected",(100,100),
                 cv2.FONT_HERSHEY_PLAIN, 3,
                 (0,255,0),2)
+                face_detected = False
         
             #Controlling the algorithm with keys
             cv2.imshow('img',img)
@@ -139,31 +147,18 @@ def Blink_Detection():
             #     print("Blinked " + str(blink_num))
 
             # blink_detection_previous_result = blink_detection_result
-
-            if counter <= 4:
-                result_list.append(result)
-                #print(result_list)
-                
-            else:
-                result_mode = statistics.mode(result_list)
-                counter = 0
-                result_list = []
-                #print(result_mode)
-                #print(previous_result_mode)
-
-                if result_mode != previous_result_mode:
-                    blink_num += 1
-                    print("Blinked " + str(blink_num))
-
-                previous_result_mode = result_mode
-   
-
+            
+            if result == "Eyes Open!" and previous_result == "Blink":
+                blink_num += 1
+                print("Blinked " + str(blink_num))
 
             first_read = False
-            counter += 1
+            previous_result = result
+
             # elif(a==ord('s') and first_read):
             #     #This will start the detection
             #     first_read = False
+           
         
         cap.release()
         cv2.destroyAllWindows()
