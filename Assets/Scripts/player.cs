@@ -47,7 +47,7 @@ public class player : MonoBehaviour
         ThreadStart ts = new ThreadStart(GetInfo);
         mThread = new Thread(ts);
         mThread.Start();
-        Debug.Log("[SERVER] running");
+        
     }
         
     private void Update()
@@ -61,14 +61,12 @@ public class player : MonoBehaviour
             change_direction = false;
         }
 
-        Debug.Log(listening);
         if(!listening && Time.time>1)
         {
             ThreadStart ts = new ThreadStart(GetInfo);
             mThread = new Thread(ts);
             mThread.Start();
-            Debug.Log("[SERVER] running");
-    
+            
         }
 
 
@@ -84,11 +82,11 @@ public class player : MonoBehaviour
 
     private void GetInfo()
     {
-        
+        Debug.Log("[SERVER] running");
         localAdd = IPAddress.Parse(connectionIP);
         listener = new TcpListener(IPAddress.Any, connectionPort);
-        listener.Start();
         listening = true;
+        listener.Start();
         client = listener.AcceptTcpClient();
 
         
@@ -118,9 +116,9 @@ public class player : MonoBehaviour
            
         }
     
+        listening = false;
         listener.Stop();
         client.Close();
-        listening = false;
         mThread.Abort();
     
     }
@@ -142,6 +140,7 @@ public class player : MonoBehaviour
         {
             Debug.Log("[SERVER] closed"); 
             input_connected = false;
+        
             return 0;
         }
 
