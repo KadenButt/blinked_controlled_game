@@ -3,9 +3,8 @@ import time
 import numpy as np
 import cv2
 from threading import Thread
-import statistics
 
-connected_to_unity = False
+
 blink_detection_result = None 
 face_detected = False
 
@@ -17,20 +16,19 @@ class Unity:
             host, port = "127.0.0.1", 25000
             self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             self.sock.connect((host, port))
-            global connected_to_unity
-            connected_to_unity = True 
+            self.connected_to_unity = True 
             print("[UNITY] connected")
         except:
             print("[UNITY] error-unable to connect to server")
 
     def Send_To_C(self,  msg):
-        if(connected_to_unity):
+        if(self.connected_to_unity):
             self.sock.sendall(msg.encode("UTF-8"))
         else:
             print("[UNITY] error-client isnt connected to server, unable to send msg")
 
     def Disconnect(self):
-        if(connected_to_unity):
+        if(self.connected_to_unity):
             disconnect_message = "!DISCONNECT!"
             self.Send_To_C(disconnect_message)
             time.sleep(1)
@@ -39,6 +37,9 @@ class Unity:
             exit()
         else:
             print("[UNITY] error-client isnt connected to server")
+    
+    def Is_Connected_Unity(self):
+        return(self.connected_to_unity)
 
 
 
@@ -123,6 +124,7 @@ if __name__ == "__main__":
             cv2.imshow('img',img)
             a = cv2.waitKey(1)
             if(a==ord('q')):
+                unity.Disconnect()
                 break
 
             ##checks for a blink

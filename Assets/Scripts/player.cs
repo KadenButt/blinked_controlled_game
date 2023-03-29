@@ -26,11 +26,13 @@ public class player : MonoBehaviour
     //network varibles
     public string connectionIP = "127.0.0.1";
     public int connectionPort = 25000;
+    string disconnectMessage = "!DISCONNECT!";
     IPAddress localAdd;
     TcpListener listener;
     TcpClient client;
 
-    bool running;
+    bool running = false;
+    bool listening = false;
 
 
 
@@ -50,7 +52,6 @@ public class player : MonoBehaviour
         
     private void Update()
     {
-        //moveVertical = Input.GetAxisRaw("Vertical");
 
 
         if(change_direction)
@@ -60,6 +61,16 @@ public class player : MonoBehaviour
             change_direction = false;
         }
 
+        Debug.Log(listening);
+        if(!listening && Time.time>1)
+        {
+            ThreadStart ts = new ThreadStart(GetInfo);
+            mThread = new Thread(ts);
+            mThread.Start();
+            Debug.Log("[SERVER] running");
+    
+        }
+
 
 
 
@@ -67,9 +78,7 @@ public class player : MonoBehaviour
 
     private void FixedUpdate()
     {
-        //Debug.Log(change_direction);
 
-        //Debug.Log(vertical_speed);
         rb2D.transform.Translate(new Vector2(0,1) * Time.deltaTime * vertical_speed);
     }
 
@@ -79,12 +88,14 @@ public class player : MonoBehaviour
         localAdd = IPAddress.Parse(connectionIP);
         listener = new TcpListener(IPAddress.Any, connectionPort);
         listener.Start();
+        listening = true;
         client = listener.AcceptTcpClient();
 
         
         Debug.Log("[SERVER] connected to client");
         
         input_connected = true;
+        
         
         //allows for the player to start moving only when the player connects
         vertical_speed = 1;
@@ -95,7 +106,7 @@ public class player : MonoBehaviour
         while (input_connected)
         {
             data = SendAndReceiveData();
-            if(data > previous_data)
+            if(data > previous_data && data != 0)
             {
                 Debug.Log("[Blink Input] blinked");
                 change_direction = true;
@@ -106,15 +117,18 @@ public class player : MonoBehaviour
             previous_data = data;
            
         }
+    
         listener.Stop();
-        //mThread.Abort();
+        client.Close();
+        listening = false;
+        mThread.Abort();
     
     }
 
     private int SendAndReceiveData()
     {
         NetworkStream nwStream = client.GetStream();
-        string disconnectMessage = "!DISCONNECT!";
+        
 
         byte[] buffer = new byte[client.ReceiveBufferSize];
         //---receiving Data from the Host----
@@ -122,17 +136,21 @@ public class player : MonoBehaviour
        
         string dataReceived = Encoding.UTF8.GetString(buffer, 0, bytesRead); //Converting byte data to string
         
-        
-        //if(!string.IsNullOrEmpty(dataReceived)){Debug.Log(dataReceived);}
+        if(!string.IsNullOrEmpty(dataReceived)){Debug.Log(dataReceived);}
 
-        if(dataReceived == disconnectMessage){Debug.Log("[SERVER] closed"); running=false;}
+        if(dataReceived == disconnectMessage)
+        {
+            Debug.Log("[SERVER] closed"); 
+            input_connected = false;
+            return 0;
+        }
 
         //
         try
         {
             return int.Parse(dataReceived);
         }
-        catch(InvalidCastException)
+        catch(FormatException)
         {
             Debug.Log("[SERVER ERROR] Unexpected int value recieved");
             return 0;

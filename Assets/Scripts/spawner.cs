@@ -8,23 +8,37 @@ public class spawner : MonoBehaviour
     public GameObject enemy;
     public bool spawn;
 
+    public float spawnRate = 0.5f;
+    public float nextSpawnRate = 0.0f;
+
+    public float IncreaseSpawnRate = 0.0f;
+
     private Vector2 spawn_location; 
 
     // Start is called before the first frame update
     void Start()
     {
-        
     }
 
     // Update is called once per frame
     void Update()
     {
-        if(spawn)
+
+
+        if(Time.time > nextSpawnRate)
         {
             Spawn_Enemy();
+            nextSpawnRate = Time.time + spawnRate;
         }
 
+        
+        if( Time.time > IncreaseSpawnRate)
+        {
+            spawnRate -= 0.1f;
+            IncreaseSpawnRate = Time.time + 1.0f;
+        }
 
+        
     }
 
     private void Spawn_Enemy()
