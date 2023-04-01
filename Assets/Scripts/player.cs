@@ -11,28 +11,23 @@ public class player : MonoBehaviour
     //game realted varibles
     private Rigidbody2D rb;
     
+    public float gravity_strength = 0;
+    public bool is_game_running ;
     private float vertical_speed;
     private float moveVertical;
-    
     private bool change_direction;
     private bool input_connected;
     
-    public float gravity_strength = 0;
-    
-    
     //threading varibles
     Thread mThread;
-    
     //network varibles
     public string connectionIP = "127.0.0.1";
     public int connectionPort = 25000;
-    string disconnectMessage = "!DISCONNECT!";
-    IPAddress localAdd;
-    TcpListener listener;
-    TcpClient client;
-
-    bool running = false;
-    bool listening = false;
+    private string disconnectMessage = "!DISCONNECT!";
+    private IPAddress localAdd;
+    private TcpListener listener;
+    private TcpClient client;
+    private bool listening = false;
 
 
 
@@ -52,13 +47,21 @@ public class player : MonoBehaviour
         
     private void Update()
     {
+        if(is_game_running && vertical_speed == 0)
+        {
+            vertical_speed = 1;
+            Debug.Log("Game is running");
+
+        }
 
         //if player blinks their velocity is inverted
+        Debug.Log(change_direction);
         if(change_direction)
         {
             vertical_speed = vertical_speed * -1;
-            Debug.Log(vertical_speed);
+            //Debug.Log(vertical_speed);
             change_direction = false;
+        
         }
         //Starts listen if no doing so already
         if(!listening && Time.time>1)
@@ -68,9 +71,6 @@ public class player : MonoBehaviour
             mThread.Start();
             
         }
-
-
-
 
     }
 
@@ -95,8 +95,6 @@ public class player : MonoBehaviour
         input_connected = true;
         
         
-        //allows for the player to start moving only when the player connects
-        vertical_speed = 1;
 
         //Senses if a blink occurs 
         int data = 0;
@@ -105,15 +103,22 @@ public class player : MonoBehaviour
         while (input_connected)
         {
             data = SendAndReceiveData();
-            if(data > previous_data && data != 0)
+
+            if(data == -1)
             {
-                Debug.Log("[Blink Input] blinked");
-                change_direction = true;
+                is_game_running = true;
             }
+            else if (data > previous_data && data != 0)
+            {
+                    Debug.Log("[Blink Input] blinked");
+                    change_direction = true;
+            }
+            else if(data != -1)
+            {
+                 previous_data = data;
+            }
+            
 
-
-
-            previous_data = data;
            
         }
     
@@ -136,7 +141,7 @@ public class player : MonoBehaviour
        
         string dataReceived = Encoding.UTF8.GetString(buffer, 0, bytesRead); //Converting byte data to string
         
-        if(!string.IsNullOrEmpty(dataReceived)){Debug.Log(dataReceived);}
+        //if(!string.IsNullOrEmpty(dataReceived)){Debug.Log(dataReceived);}
 
         if(dataReceived == disconnectMessage)
         {
@@ -149,11 +154,14 @@ public class player : MonoBehaviour
         //
         try
         {
-            return int.Parse(dataReceived);
+            int dataReceivedInt = int.Parse(dataReceived);
+            if(dataReceivedInt == -1){return -1;}
+            return dataReceivedInt;
         }
         catch(FormatException)
         {
-            Debug.Log("[SERVER ERROR] Unexpected int value recieved");
+            
+            Debug.Log("[SERVER ERROR] Unexpected value recieved: " + dataReceived);
             return 0;
         }
 

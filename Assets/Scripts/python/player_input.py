@@ -139,7 +139,12 @@ if __name__ == "__main__":
             if(result == "Eyes Open!" and previous_result == "Blink"):
                 blink_num += 1
                 ##sends blink number to unity
-                unity.Send_To_C(str(blink_num))
+                if(blink_num == 1):
+                    unity.Send_To_C("-1") 
+                else:
+                    unity.Send_To_C(str(blink_num))
+
+
 
             first_read = False
             previous_result = result

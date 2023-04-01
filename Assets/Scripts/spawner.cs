@@ -6,8 +6,9 @@ using UnityEngine;
 public class spawner : MonoBehaviour
 {
     public GameObject enemy;
+    public player script; 
 
-    public float spawnRate = 0.5f;
+    float spawnRate = 5f;
     public float nextSpawnRate = 0.0f;
 
     public float IncreaseSpawnRate = 0.0f;
@@ -24,17 +25,17 @@ public class spawner : MonoBehaviour
     {
 
         //spawns enemy after given time
-        if(Time.time > nextSpawnRate)
+        if(Time.time > nextSpawnRate && script.is_game_running == true)
         {
             Spawn_Enemy();
             nextSpawnRate = Time.time + spawnRate;
         }
 
         //Increases the rate of the enemy being spawned in
-        if( Time.time > IncreaseSpawnRate)
+        if( Time.time > IncreaseSpawnRate && script.is_game_running == true)
         {
             spawnRate -= 0.1f;
-            IncreaseSpawnRate = Time.time + 1.0f;
+            IncreaseSpawnRate = Time.time + 2.0f;
         }
 
         
