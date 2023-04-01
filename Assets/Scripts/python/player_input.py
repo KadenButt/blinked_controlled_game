@@ -20,6 +20,8 @@ class Unity:
             print("[UNITY] connected")
         except:
             print("[UNITY] error-unable to connect to server")
+            self.connected_to_unity = False
+
 
     def Send_To_C(self,  msg):
         if(self.connected_to_unity):
@@ -33,13 +35,19 @@ class Unity:
             self.Send_To_C(disconnect_message)
             time.sleep(1)
             self.sock.close()
+            self.Update_Connected_Unity(False)
             print("[UNITY] disconnected")
             exit()
         else:
             print("[UNITY] error-client isnt connected to server")
-    
+
     def Is_Connected_Unity(self):
-        return(self.connected_to_unity)
+        return 
+    
+    def Update_Connected_Unity(self, x):
+        self.connected_to_unity = x
+
+    
 
 
 
@@ -106,7 +114,6 @@ if __name__ == "__main__":
                             (0,0,255),2)
                             result = "No eyes detected"
                         else:
-                            #This will print on console and restart the algorithm
                             result = "Blink"
                             first_read=True
 
@@ -123,6 +130,7 @@ if __name__ == "__main__":
             #Controlling the algorithm with keys
             cv2.imshow('img',img)
             a = cv2.waitKey(1)
+            ##disconnects unity when "q" is pressed
             if(a==ord('q')):
                 unity.Disconnect()
                 break
@@ -130,6 +138,7 @@ if __name__ == "__main__":
             ##checks for a blink
             if(result == "Eyes Open!" and previous_result == "Blink"):
                 blink_num += 1
+                ##sends blink number to unity
                 unity.Send_To_C(str(blink_num))
 
             first_read = False

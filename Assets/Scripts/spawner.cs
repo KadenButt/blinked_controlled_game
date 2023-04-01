@@ -6,7 +6,6 @@ using UnityEngine;
 public class spawner : MonoBehaviour
 {
     public GameObject enemy;
-    public bool spawn;
 
     public float spawnRate = 0.5f;
     public float nextSpawnRate = 0.0f;
@@ -24,14 +23,14 @@ public class spawner : MonoBehaviour
     void Update()
     {
 
-
+        //spawns enemy after given time
         if(Time.time > nextSpawnRate)
         {
             Spawn_Enemy();
             nextSpawnRate = Time.time + spawnRate;
         }
 
-        
+        //Increases the rate of the enemy being spawned in
         if( Time.time > IncreaseSpawnRate)
         {
             spawnRate -= 0.1f;
@@ -41,6 +40,7 @@ public class spawner : MonoBehaviour
         
     }
 
+    //function that spawn an enemy at  a random y
     private void Spawn_Enemy()
     {
     

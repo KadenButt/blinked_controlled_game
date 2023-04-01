@@ -9,7 +9,7 @@ using System.Threading;
 public class player : MonoBehaviour
 {
     //game realted varibles
-    private Rigidbody2D rb2D;
+    private Rigidbody2D rb;
     
     private float vertical_speed;
     private float moveVertical;
@@ -38,9 +38,9 @@ public class player : MonoBehaviour
 
     private void Start()
     {
-        rb2D = gameObject.GetComponent<Rigidbody2D>();
-        rb2D.gravityScale = gravity_strength; 
-        //moveVertical = 0;
+        //makes player experence no gravity
+        rb = gameObject.GetComponent<Rigidbody2D>();
+        rb.gravityScale = gravity_strength; 
         
    
         
@@ -53,14 +53,14 @@ public class player : MonoBehaviour
     private void Update()
     {
 
-
+        //if player blinks their velocity is inverted
         if(change_direction)
         {
             vertical_speed = vertical_speed * -1;
             Debug.Log(vertical_speed);
             change_direction = false;
         }
-
+        //Starts listen if no doing so already
         if(!listening && Time.time>1)
         {
             ThreadStart ts = new ThreadStart(GetInfo);
@@ -76,28 +76,29 @@ public class player : MonoBehaviour
 
     private void FixedUpdate()
     {
-
-        rb2D.transform.Translate(new Vector2(0,1) * Time.deltaTime * vertical_speed);
+        //sets players velocity
+        rb.transform.Translate(new Vector2(0,1) * Time.deltaTime * vertical_speed);
     }
 
     private void GetInfo()
     {
+        //listens for client
         Debug.Log("[SERVER] running");
         localAdd = IPAddress.Parse(connectionIP);
         listener = new TcpListener(IPAddress.Any, connectionPort);
         listening = true;
         listener.Start();
-        client = listener.AcceptTcpClient();
 
-        
+        //client is connected
+        client = listener.AcceptTcpClient();
         Debug.Log("[SERVER] connected to client");
-        
         input_connected = true;
         
         
         //allows for the player to start moving only when the player connects
         vertical_speed = 1;
 
+        //Senses if a blink occurs 
         int data = 0;
         int previous_data = 0;
 
@@ -116,6 +117,7 @@ public class player : MonoBehaviour
            
         }
     
+        //closes the TCP connection
         listening = false;
         listener.Stop();
         client.Close();

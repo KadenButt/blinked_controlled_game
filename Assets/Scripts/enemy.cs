@@ -7,21 +7,22 @@ public class enemy : MonoBehaviour
 {
 
     public float velocity;
-    public Rigidbody2D rb2D;
+    public Rigidbody2D rb;
 
     
     // Start is called before the first frame update
     void Start()
     {
-        rb2D = transform.GetComponent<Rigidbody2D>();
+        //sets the velocity, makes it experence no gravity.
+        rb = transform.GetComponent<Rigidbody2D>();
         velocity = 1;
-        rb2D.gravityScale = 0f;
-        //transform.eulerAngles = new Vector2(0,90);
+        rb.gravityScale = 0f;
     }
 
     // Update is called once per frame
     void Update()
     {
+        //destroys the object if it goes out of bounds
         if(transform.position[0] < -12 )
         {
             Destroy(transform.gameObject);
@@ -30,7 +31,8 @@ public class enemy : MonoBehaviour
     
     void FixedUpdate()
     {
-        rb2D.transform.Translate(new Vector2(-1,0)  * velocity);
+        //Controls the velocity
+        rb.transform.Translate(new Vector2(-1,0)  * velocity);
     }
 
 
