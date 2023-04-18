@@ -35,6 +35,15 @@ public class enemy : MonoBehaviour
         rb.transform.Translate(new Vector2(-1,0)  * velocity);
     }
 
+    private void OnCollisionEnter2D(Collision2D other) 
+    {
+        if(other.gameObject.tag == "player")
+        {
+            Destroy(transform.gameObject);
+        }
+    }
+
+
 
 
 }

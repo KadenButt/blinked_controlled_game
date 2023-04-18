@@ -50,12 +50,11 @@ public class player : MonoBehaviour
         if(is_game_running && vertical_speed == 0)
         {
             vertical_speed = 1;
-            Debug.Log("Game is running");
+            Debug.Log("[GAME] Running");
 
         }
 
         //if player blinks their velocity is inverted
-        Debug.Log(change_direction);
         if(change_direction)
         {
             vertical_speed = vertical_speed * -1;
@@ -63,8 +62,9 @@ public class player : MonoBehaviour
             change_direction = false;
         
         }
-        //Starts listen if no doing so already
-        if(!listening && Time.time>1)
+        
+        // Starts listen if no doing so already
+        if(!listening && is_game_running)
         {
             ThreadStart ts = new ThreadStart(GetInfo);
             mThread = new Thread(ts);
@@ -167,6 +167,15 @@ public class player : MonoBehaviour
 
         
         
+    }
+
+    private void OnCollisionEnter2D(Collision2D other) 
+    {
+        if(other.gameObject.tag == "enemy")
+        {
+            Debug.Log("[Game] Game Over");
+            Destroy(transform.gameObject);
+        }
     }
 
 }
