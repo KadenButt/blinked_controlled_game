@@ -153,6 +153,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2a2279eba4f40b54fb9d8a861df7f7d4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  gravity_strength: 0
+  is_game_running: 0
   connectionIP: 127.0.0.1
   connectionPort: 25000
 --- !u!212 &211381305

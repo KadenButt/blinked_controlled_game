@@ -1,0 +1,12 @@
+{
+  "files.exclude": {
+    "data.meta": true,
+    "enemy.cs.meta": true,
+    "GameOver.cs.meta": true,
+    "MainMenu.cs.meta": true,
+    "python.meta": true,
+    "player.cs.meta": true,
+    "spawner.cs.meta": true,
+    "data\\high_scores.txt.meta": true
+  }
+}
