@@ -13,7 +13,7 @@ public class spawner : MonoBehaviour
 
     public float IncreaseSpawnRate = 0.0f;
 
-    private Vector2 spawn_location; 
+    private Vector2 spawnLocation; 
 
     // Start is called before the first frame update
     void Start()
@@ -25,16 +25,17 @@ public class spawner : MonoBehaviour
     {
 
         //spawns enemy after given time
-        if(Time.time > nextSpawnRate && script.is_game_running == true)
+        if(Time.time > nextSpawnRate && script.isGameRunning == true)
         {
             Spawn_Enemy();
             nextSpawnRate = Time.time + spawnRate;
         }
 
         //Increases the rate of the enemy being spawned in
-        if( Time.time > IncreaseSpawnRate && script.is_game_running == true)
+        if( Time.time > IncreaseSpawnRate && script.isGameRunning == true)
         {
-            spawnRate -= 0.1f;
+            if(spawnRate > 0.5f){spawnRate -= 0.5f;}
+            
             IncreaseSpawnRate = Time.time + 2.0f;
         }
 
@@ -45,8 +46,8 @@ public class spawner : MonoBehaviour
     private void Spawn_Enemy()
     {
     
-        spawn_location = new Vector2(transform.position[0], Random.Range(-5.0f,5.0f));
-        Instantiate(enemy, spawn_location, transform.rotation);
+        spawnLocation = new Vector2(transform.position[0], Random.Range(-5.0f,5.0f));
+        Instantiate(enemy, spawnLocation, transform.rotation);
     }
 
 

@@ -11,77 +11,80 @@ using UnityEngine.SceneManagement;
 public class GameOver : MonoBehaviour
 {
 
-    public Button enter_button;
-    public Button main_menu;
-    public TMP_InputField name_field;
-    public TMP_Text score_board;
-    public int player_score = 100;
+    public Button enterButton;
+    public Button mainMenu;
+    public TMP_InputField nameField;
+    public TMP_Text scoreBoard;
+    public player script;
 
 
-    private string highscores_path;
+    private string highScorePath;
+    private int playerScore;
+    
     
 
     // Start is called before the first frame update
     void Start()
     {
-        enter_button.onClick.AddListener(OnClick);
-        main_menu.onClick.AddListener(MainMenu);
-        highscores_path =  Application.dataPath + "/data/high_scores.txt";
+        playerScore = player.score;
+        enterButton.onClick.AddListener(OnClick);
+        mainMenu.onClick.AddListener(MainMenu);
+        highScorePath =  Application.dataPath + "/data/high_scores.txt";
         DisplayHighScore();
     }
 
     void DisplayHighScore()
     {
-        string[] lines = File.ReadAllLines(highscores_path);
+        string[] lines = File.ReadAllLines(highScorePath);
         var scores = lines[1].Split(",");
         var names = lines[2].Split(",");
-        string score_board_text = ""; 
+        string scoreBoardText = ""; 
 
         for(int x = 0 ; x <= scores.Length-1; ++x)
         {
-            score_board_text += names[x] + " " +  scores[x] + "\n";
+            scoreBoardText += names[x] + " " +  scores[x] + "\n";
         }
 
-        score_board.text = score_board_text;
+        scoreBoard.text = scoreBoardText;
 
     }
 
     void OnClick()
     {
         //end if no text is entered
-        if(name_field.text == null)
+        if(nameField.text == null)
         {
             return;
         }
 
         //readfile
-        string[] lines = File.ReadAllLines(highscores_path);
-        string return_data; 
+        string[] lines = File.ReadAllLines(highScorePath);
+        string returnData; 
 
-        int order_header = -1;
+        int tail = -1;
         int pointer = Convert.ToInt16(lines[0]);
 
         
         //seperates the pointer, scores, names and converts them
         
         var scores = lines[1].Split(",");
-        int[] int_scores = new int[10];
+        int[] instScore = new int[10];
         var names = lines[2].Split(",");
 
         //conver string list to int list
-        for(int x = 0; x < 10; x++){int_scores[x] = Convert.ToInt32(scores[x]);}
+        for(int x = 0; x < 10; x++){instScore[x] = Convert.ToInt32(scores[x]);}
 
 
         //find the first value its smaller then and stores the location as order_head
         for(int x = pointer; x >= 0; x--)
         {
-            if(int_scores[x] < player_score)
+            if(instScore[x] < playerScore)
             {
-                order_header = x;
+                tail = x;
             }
             
             //if no high score ends function
-            if(x == 0 && order_header == -1)
+            if(x == 0 && tail == -1)
             {
                 return;   
             }
@@ -89,14 +92,14 @@ public class GameOver : MonoBehaviour
 
 
         //moves all the values down, and places highscore in appropiate location
-        if(order_header != 9)
+        if(tail != 9)
         {
-            for(int x = pointer; x != order_header-1; x--)
+            for(int x = pointer; x != tail-1; x--)
             {
 
                 if(x != 9)
                 {
-                    int_scores[x+1] = int_scores[x];
+                    instScore[x+1] = instScore[x];
                     names[x+1] = names[x];
                 }
 
@@ -105,8 +108,8 @@ public class GameOver : MonoBehaviour
 
 
             
-        int_scores[order_header] = player_score;
-        names[order_header] = name_field.text;
+        instScore[tail] = playerScore;
+        names[tail] = nameField.text;
         
         
 
@@ -120,14 +123,14 @@ public class GameOver : MonoBehaviour
                 
 
         //converts int list to string list
-        for(int x = 0; x < 10; x++){scores[x] = int_scores[x].ToString();}
+        for(int x = 0; x < 10; x++){scores[x] = instScore[x].ToString();}
         //converts all the data into one string
-        return_data = pointer.ToString()+ "\n" + ListToString(scores) + "\n" + ListToString(names);
+        returnData = pointer.ToString()+ "\n" + ListToString(scores) + "\n" + ListToString(names);
         //writes the data back to file
-        File.WriteAllText(highscores_path, return_data);
-        //Debug.Log(return_data);
+        File.WriteAllText(highScorePath, returnData);
+        //Debug.Log(returnData);
         //set the text box to null
-        name_field.text = "";
+        nameField.text = "";
         //update score board
         DisplayHighScore();
 
@@ -141,19 +144,19 @@ public class GameOver : MonoBehaviour
 //function that turns a list to a string
     string ListToString(string[] list)
     {
-        string return_list = null;
+        string returnList = null;
         for(int x = 0; x < list.Length; x++)
         {
             if(x<9)
             {
-                return_list += list[x]+",";
+                returnList += list[x]+",";
             }else
             {
-                return_list += list[x];
+                returnList += list[x];
             }
             
         }
-        return return_list;
+        return returnList;
     }
 
     

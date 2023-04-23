@@ -1808,8 +1808,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2da2c418ba1025e45ae6084d166d687e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  enter_button: {fileID: 1760520353}
-  main_menu: {fileID: 2049045802}
-  name_field: {fileID: 1478232075}
-  score_board: {fileID: 1933106926}
-  player_score: 100
+  enterButton: {fileID: 1760520353}
+  mainMenu: {fileID: 2049045802}
+  nameField: {fileID: 1478232075}
+  scoreBoard: {fileID: 1933106926}
+  playerScore: 100

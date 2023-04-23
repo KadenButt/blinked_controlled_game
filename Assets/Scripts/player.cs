@@ -6,17 +6,22 @@ using System.Net.Sockets;
 using System.Text;
 using UnityEngine;
 using System.Threading;
+using UnityEngine.SceneManagement;
+
+
+
 public class player : MonoBehaviour
 {
     //game realted varibles
     private Rigidbody2D rb;
     
-    public float gravity_strength = 0;
-    public bool is_game_running ;
-    private float vertical_speed;
-    private float moveVertical;
-    private bool change_direction;
-    private bool input_connected;
+    public float gravityStrength = 0;
+    public static int score;
+    public bool isGameRunning;
+    public static bool inputConnection; 
+    private int startTime;
+    private float verticalSpeed;
+    private bool changeDirection;
     
     //threading varibles
     Thread mThread;
@@ -33,9 +38,13 @@ public class player : MonoBehaviour
 
     private void Start()
     {
+
         //makes player experence no gravity
         rb = gameObject.GetComponent<Rigidbody2D>();
-        rb.gravityScale = gravity_strength; 
+        rb.gravityScale = gravityStrength; 
+
+        //places player in starting position
+        transform.position = new Vector2(-10,0);
         
    
         
@@ -47,24 +56,23 @@ public class player : MonoBehaviour
         
     private void Update()
     {
-        if(is_game_running && vertical_speed == 0)
+        if(isGameRunning && verticalSpeed == 0)
         {
-            vertical_speed = 1;
+            verticalSpeed = 1;
             Debug.Log("[GAME] Running");
 
         }
 
         //if player blinks their velocity is inverted
-        if(change_direction)
+        if(changeDirection)
         {
-            vertical_speed = vertical_speed * -1;
-            //Debug.Log(vertical_speed);
-            change_direction = false;
+            verticalSpeed = verticalSpeed * -1;
+            changeDirection = false;
         
         }
         
         // Starts listen if no doing so already
-        if(!listening && is_game_running)
+        if(!listening && isGameRunning)
         {
             ThreadStart ts = new ThreadStart(GetInfo);
             mThread = new Thread(ts);
@@ -72,12 +80,26 @@ public class player : MonoBehaviour
             
         }
 
+        if(!isGameRunning)
+        {
+            startTime = (int)Math.Round(Time.time);
+        }else
+        {
+            score = (int)Math.Round(Time.time) - startTime;
+        }
+        
+
     }
 
     private void FixedUpdate()
     {
         //sets players velocity
-        rb.transform.Translate(new Vector2(0,1) * Time.deltaTime * vertical_speed);
+        rb.transform.Translate(new Vector2(0,1) * Time.deltaTime * verticalSpeed);
+        //causes player to change direction when out side boundaries 
+        if(transform.position[1] > 4.5 && verticalSpeed == 1 || transform.position[1] <-4.5 && verticalSpeed == -1){changeDirection = true;}
+
+      
+        
     }
 
     private void GetInfo()
@@ -92,31 +114,33 @@ public class player : MonoBehaviour
         //client is connected
         client = listener.AcceptTcpClient();
         Debug.Log("[SERVER] connected to client");
-        input_connected = true;
+        inputConnection = true;
         
         
 
         //Senses if a blink occurs 
         int data = 0;
-        int previous_data = 0;
+        int previousData = 0;
 
-        while (input_connected)
+        while (inputConnection)
         {
             data = SendAndReceiveData();
 
             if(data == -1)
             {
-                is_game_running = true;
+                isGameRunning = true;
             }
-            else if (data > previous_data && data != 0)
+            else if (data > previousData && data != 0)
             {
                     Debug.Log("[Blink Input] blinked");
-                    change_direction = true;
+                    changeDirection = true;
             }
             else if(data != -1)
             {
-                 previous_data = data;
+                 previousData = data;
             }
+
+
             
 
            
@@ -146,8 +170,8 @@ public class player : MonoBehaviour
         if(dataReceived == disconnectMessage)
         {
             Debug.Log("[SERVER] closed"); 
-            input_connected = false;
-        
+            inputConnection = false;
+
             return 0;
         }
 
@@ -155,12 +179,10 @@ public class player : MonoBehaviour
         try
         {
             int dataReceivedInt = int.Parse(dataReceived);
-            if(dataReceivedInt == -1){return -1;}
             return dataReceivedInt;
         }
         catch(FormatException)
         {
-            
             Debug.Log("[SERVER ERROR] Unexpected value recieved: " + dataReceived);
             return 0;
         }
@@ -173,8 +195,8 @@ public class player : MonoBehaviour
     {
         if(other.gameObject.tag == "enemy")
         {
-            Debug.Log("[Game] Game Over");
-            Destroy(transform.gameObject);
+            inputConnection = false;
+            SceneManager.LoadScene("GameOver");
         }
     }
 

@@ -15,7 +15,7 @@ public class enemy : MonoBehaviour
     {
         //sets the velocity, makes it experence no gravity.
         rb = transform.GetComponent<Rigidbody2D>();
-        velocity = 1;
+        velocity = 4;
         rb.gravityScale = 0f;
     }
 
@@ -32,7 +32,7 @@ public class enemy : MonoBehaviour
     void FixedUpdate()
     {
         //Controls the velocity
-        rb.transform.Translate(new Vector2(-1,0)  * velocity);
+        rb.transform.Translate(new Vector2(-1,0)  * velocity * Time.deltaTime);
     }
 
     private void OnCollisionEnter2D(Collision2D other) 
